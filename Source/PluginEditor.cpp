@@ -6,7 +6,6 @@ DrumeeAudioProcessorEditor::DrumeeAudioProcessorEditor(DrumeeAudioProcessor& p)
     setLookAndFeel(&lookAndFeel);
 
     setResizable(false, false);
-    setSize(960, 540);
 
     titleLabel.setText("DRUMEE", juce::dontSendNotification);
     titleLabel.setFont(juce::Font(22.0f, juce::Font::bold));
@@ -72,6 +71,11 @@ DrumeeAudioProcessorEditor::DrumeeAudioProcessorEditor(DrumeeAudioProcessor& p)
     }
 
     refreshPresetList();
+
+    // setSize() triggers resized() synchronously, so it must come after every
+    // child component (encoders, visualizer, sample slots) has been created -
+    // otherwise resized() dereferences still-null pointers and crashes.
+    setSize(960, 540);
 }
 
 DrumeeAudioProcessorEditor::~DrumeeAudioProcessorEditor()
@@ -175,7 +179,8 @@ void DrumeeAudioProcessorEditor::resized()
     for (auto* enc : chaosEncoders)
         enc->setBounds(rightColumn.removeFromLeft(chaosColWidth).reduced(4));
 
-    visualizer->setBounds(bounds);
+    if (visualizer != nullptr)
+        visualizer->setBounds(bounds);
 }
 
 void DrumeeAudioProcessorEditor::refreshPresetList()
