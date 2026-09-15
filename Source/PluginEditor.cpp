@@ -5,10 +5,7 @@ DrumeeAudioProcessorEditor::DrumeeAudioProcessorEditor(DrumeeAudioProcessor& p)
 {
     setLookAndFeel(&lookAndFeel);
 
-    editorConstrainer.setFixedAspectRatio(16.0 / 9.0);
-    editorConstrainer.setSizeLimits(480, 270, 1600, 900);
-    setConstrainer(&editorConstrainer);
-    setResizable(true, true);
+    setResizable(false, false);
     setSize(960, 540);
 
     titleLabel.setText("DRUMEE", juce::dontSendNotification);

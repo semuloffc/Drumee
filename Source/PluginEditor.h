@@ -19,7 +19,6 @@ private:
 
     DrumeeAudioProcessor& processor;
     DrumeeLookAndFeel lookAndFeel;
-    juce::ComponentBoundsConstrainer editorConstrainer;
 
     juce::Label titleLabel;
     juce::ComboBox presetBox;
