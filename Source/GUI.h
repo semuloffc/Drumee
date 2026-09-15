@@ -78,7 +78,7 @@ private:
     int lastPaintedStep = -1;
 };
 
-class SampleSlotComponent : public juce::Component
+class SampleSlotComponent : public juce::Component, public juce::FileDragAndDropTarget
 {
 public:
     SampleSlotComponent(int trackIndex, SampleTrack& trackToUse);
@@ -87,12 +87,21 @@ public:
     void paint(juce::Graphics&) override;
     void refresh();
 
+    bool isInterestedInFileDrag(const juce::StringArray& files) override;
+    void fileDragEnter(const juce::StringArray& files, int x, int y) override;
+    void fileDragExit(const juce::StringArray& files) override;
+    void filesDropped(const juce::StringArray& files, int x, int y) override;
+
     std::function<void(int)> onLoadRequested;
+    std::function<void(int, const juce::File&)> onFileDropped;
 
 private:
+    bool isAcceptableFile(const juce::File& file) const;
+
     int index;
     SampleTrack& track;
     juce::TextButton loadButton;
     juce::Label nameLabel;
     juce::Label statusLabel;
+    bool isDragHover = false;
 };

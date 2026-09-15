@@ -235,10 +235,10 @@ void SampleSlotComponent::paint(juce::Graphics& g)
     static const juce::Colour accents[3] = { DrumeeColours::accent1, DrumeeColours::accent2, DrumeeColours::accent3 };
     juce::Colour accent = accents[index % 3];
 
-    g.setColour(DrumeeColours::surface1.withAlpha(0.7f));
+    g.setColour(isDragHover ? DrumeeColours::surface2.brighter(0.1f) : DrumeeColours::surface1.withAlpha(0.7f));
     g.fillRoundedRectangle(bounds, 10.0f);
-    g.setColour(accent.withAlpha(0.55f));
-    g.drawRoundedRectangle(bounds.reduced(0.75f), 10.0f, 1.4f);
+    g.setColour((isDragHover ? accent : accent.withAlpha(0.55f)));
+    g.drawRoundedRectangle(bounds.reduced(0.75f), 10.0f, isDragHover ? 2.0f : 1.4f);
 }
 
 void SampleSlotComponent::refresh()
@@ -246,4 +246,48 @@ void SampleSlotComponent::refresh()
     nameLabel.setText(track.name, juce::dontSendNotification);
     statusLabel.setText(track.loaded ? track.sourceFile.getFileName() : "Empty slot",
                          juce::dontSendNotification);
+}
+
+bool SampleSlotComponent::isAcceptableFile(const juce::File& file) const
+{
+    static const juce::StringArray extensions { ".wav", ".wave", ".aif", ".aiff", ".flac", ".ogg", ".mp3" };
+    return extensions.contains(file.getFileExtension().toLowerCase());
+}
+
+bool SampleSlotComponent::isInterestedInFileDrag(const juce::StringArray& files)
+{
+    for (auto& path : files)
+        if (isAcceptableFile(juce::File(path)))
+            return true;
+    return false;
+}
+
+void SampleSlotComponent::fileDragEnter(const juce::StringArray&, int, int)
+{
+    isDragHover = true;
+    repaint();
+}
+
+void SampleSlotComponent::fileDragExit(const juce::StringArray&)
+{
+    isDragHover = false;
+    repaint();
+}
+
+void SampleSlotComponent::filesDropped(const juce::StringArray& files, int, int)
+{
+    isDragHover = false;
+
+    for (auto& path : files)
+    {
+        juce::File file(path);
+        if (isAcceptableFile(file) && file.existsAsFile())
+        {
+            if (onFileDropped)
+                onFileDropped(index, file);
+            break;
+        }
+    }
+
+    repaint();
 }

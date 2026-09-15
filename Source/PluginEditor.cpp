@@ -66,6 +66,12 @@ DrumeeAudioProcessorEditor::DrumeeAudioProcessorEditor(DrumeeAudioProcessor& p)
     {
         auto slot = std::make_unique<SampleSlotComponent>(i, processor.tracks[(size_t) i]);
         slot->onLoadRequested = [this](int trackIndex) { loadSample(trackIndex); };
+        slot->onFileDropped = [this](int trackIndex, const juce::File& file)
+        {
+            if (processor.loadSampleForTrack(trackIndex, file)
+                && trackIndex >= 0 && trackIndex < (int) sampleSlots.size())
+                sampleSlots[(size_t) trackIndex]->refresh();
+        };
         addAndMakeVisible(*slot);
         sampleSlots.push_back(std::move(slot));
     }
