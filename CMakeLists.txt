@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(Drumee VERSION 0.1.1)
+project(Drumee VERSION 0.1.3)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -17,6 +17,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(JUCE)
 
 juce_add_plugin(Drumee
+    VERSION "0.1.3"
     COMPANY_NAME "Reflexed"
     PLUGIN_MANUFACTURER_CODE Rflx
     PLUGIN_CODE Drm1

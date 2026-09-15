@@ -13,6 +13,11 @@ DrumeeAudioProcessorEditor::DrumeeAudioProcessorEditor(DrumeeAudioProcessor& p)
     titleLabel.setColour(juce::Label::textColourId, DrumeeColours::textPrimary);
     addAndMakeVisible(titleLabel);
 
+    versionLabel.setText("v" + juce::String(JucePlugin_VersionString), juce::dontSendNotification);
+    versionLabel.setFont(juce::Font(11.0f, juce::Font::plain));
+    versionLabel.setColour(juce::Label::textColourId, DrumeeColours::textMuted);
+    addAndMakeVisible(versionLabel);
+
     presetBox.setTextWhenNothingSelected("Init Preset");
     presetBox.onChange = [this]
     {
@@ -96,7 +101,9 @@ void DrumeeAudioProcessorEditor::resized()
     auto bounds = getLocalBounds().reduced(16);
 
     auto topBar = bounds.removeFromTop(48);
-    titleLabel.setBounds(topBar.removeFromLeft(160));
+    auto titleArea = topBar.removeFromLeft(160);
+    titleLabel.setBounds(titleArea.removeFromTop(26));
+    versionLabel.setBounds(titleArea);
     newButton.setBounds(topBar.removeFromRight(60).reduced(2));
     topBar.removeFromRight(6);
     saveButton.setBounds(topBar.removeFromRight(70).reduced(2));

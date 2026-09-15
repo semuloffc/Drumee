@@ -25,6 +25,12 @@ void SamplePlayerVoice::renderNextBlock(juce::AudioBuffer<float>& output, int st
     const int srcLength = sourceBuffer->getNumSamples();
     const int outChannels = output.getNumChannels();
 
+    if (srcChannels <= 0 || srcLength <= 0 || outChannels <= 0)
+    {
+        isActive = false;
+        return;
+    }
+
     for (int i = 0; i < numSamples; ++i)
     {
         if (delaySamples > 0)

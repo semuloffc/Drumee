@@ -21,6 +21,7 @@ private:
     DrumeeLookAndFeel lookAndFeel;
 
     juce::Label titleLabel;
+    juce::Label versionLabel;
     juce::ComboBox presetBox;
     juce::TextButton saveButton { "Save" };
     juce::TextButton newButton { "New" };
