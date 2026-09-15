@@ -104,12 +104,14 @@ void Sequencer::prepare(double newSampleRate)
     sampleRate = newSampleRate;
     phase = 0.0;
     currentStep = 0;
+    wasPlaying = false;
 }
 
 void Sequencer::reset()
 {
     phase = 0.0;
     currentStep = 0;
+    wasPlaying = false;
 }
 
 void Sequencer::process(int numSamples, double bpm, bool isPlaying,
@@ -118,13 +120,28 @@ void Sequencer::process(int numSamples, double bpm, bool isPlaying,
                          float probabilityPct, const TriggerCallback& callback)
 {
     if (! isPlaying || bpm <= 0.0)
+    {
+        wasPlaying = false;
         return;
+    }
 
     double samplesPerStep = (60.0 / bpm / 4.0) * sampleRate;
     if (samplesPerStep < 1.0)
         return;
 
     int processed = 0;
+
+    // Transport just started (or restarted): snap to step 0 and fire it
+    // immediately at sample 0, instead of waiting a full step length before
+    // the first hit is ever heard.
+    if (! wasPlaying)
+    {
+        wasPlaying = true;
+        phase = 0.0;
+        currentStep.store(0);
+        fireStep(0, 0, samplesPerStep, nudgeMs, swingPct, humanizePct,
+                 pitchRandSt, velocityDepth, ratchetAmount, probabilityPct, numSamples, callback);
+    }
 
     while (processed < numSamples)
     {
@@ -143,10 +160,13 @@ void Sequencer::process(int numSamples, double bpm, bool isPlaying,
         processed += advance;
         phase = 0.0;
 
-        int step = currentStep.load();
-        fireStep(step, processed, samplesPerStep, nudgeMs, swingPct, humanizePct,
+        // Fire the step that is *starting* right here (not the one that just
+        // ended), so the audible hit lines up with the step that lights up
+        // in the UI and with the host's beat grid.
+        int nextStep = (currentStep.load() + 1) % kNumSteps;
+        currentStep.store(nextStep);
+        fireStep(nextStep, processed, samplesPerStep, nudgeMs, swingPct, humanizePct,
                  pitchRandSt, velocityDepth, ratchetAmount, probabilityPct, numSamples, callback);
-        currentStep.store((step + 1) % kNumSteps);
     }
 }
 

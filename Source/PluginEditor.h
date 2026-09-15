@@ -16,6 +16,8 @@ private:
     void refreshPresetList();
     void savePresetDialog();
     void loadSample(int trackIndex);
+    void refreshAllSampleSlots();
+    void selectPresetInBox(const juce::String& name);
 
     DrumeeAudioProcessor& processor;
     DrumeeLookAndFeel lookAndFeel;

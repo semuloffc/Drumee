@@ -71,6 +71,7 @@ public:
 private:
     double sampleRate = 44100.0;
     double phase = 0.0;
+    bool wasPlaying = false;
     juce::Random random;
 
     void fireStep(int step, int offsetInBlock, double samplesPerStep,

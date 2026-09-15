@@ -22,8 +22,12 @@ DrumeeAudioProcessorEditor::DrumeeAudioProcessorEditor(DrumeeAudioProcessor& p)
     presetBox.onChange = [this]
     {
         auto name = presetBox.getText();
-        if (name.isNotEmpty())
-            processor.presetManager.loadPreset(name);
+        if (name.isNotEmpty() && processor.presetManager.loadPreset(name))
+        {
+            refreshAllSampleSlots();
+            if (visualizer != nullptr)
+                visualizer->repaint();
+        }
     };
     addAndMakeVisible(presetBox);
 
@@ -35,6 +39,9 @@ DrumeeAudioProcessorEditor::DrumeeAudioProcessorEditor(DrumeeAudioProcessor& p)
         for (auto& step : processor.sequencer.pattern)
             for (int t = 0; t < kNumTracks; ++t)
                 step.active[t] = false;
+
+        if (visualizer != nullptr)
+            visualizer->repaint();
     };
     addAndMakeVisible(newButton);
 
@@ -173,11 +180,32 @@ void DrumeeAudioProcessorEditor::resized()
 
 void DrumeeAudioProcessorEditor::refreshPresetList()
 {
-    presetBox.clear();
+    presetBox.clear(juce::dontSendNotification);
     auto names = processor.presetManager.getAllPresetNames();
     int id = 1;
     for (auto& name : names)
         presetBox.addItem(name, id++);
+
+    selectPresetInBox(processor.presetManager.getCurrentPresetName());
+}
+
+void DrumeeAudioProcessorEditor::selectPresetInBox(const juce::String& name)
+{
+    for (int i = 0; i < presetBox.getNumItems(); ++i)
+    {
+        if (presetBox.getItemText(i) == name)
+        {
+            presetBox.setSelectedItemIndex(i, juce::dontSendNotification);
+            return;
+        }
+    }
+    presetBox.setText(name, juce::dontSendNotification);
+}
+
+void DrumeeAudioProcessorEditor::refreshAllSampleSlots()
+{
+    for (auto& slot : sampleSlots)
+        slot->refresh();
 }
 
 void DrumeeAudioProcessorEditor::savePresetDialog()
@@ -192,8 +220,8 @@ void DrumeeAudioProcessorEditor::savePresetDialog()
         if (result == 1)
         {
             auto name = alert->getTextEditorContents("name");
-            processor.presetManager.savePreset(name);
-            refreshPresetList();
+            if (processor.presetManager.savePreset(name))
+                refreshPresetList();
         }
         delete alert;
     }));
